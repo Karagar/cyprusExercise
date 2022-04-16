@@ -5,18 +5,20 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
 var conn *sql.DB
+var dbPassword = os.Getenv("MSSQL_SA_PASSWORD")
 
 func main() {
 	var (
-		server   string = "localhost"
+		server   string = "cyprus_db"
 		user     string = "sa"
-		password string = "newer_use_it_in_prod"
-		database string = "auth"
+		password string = dbPassword
+		database string = "exercise"
 		port     int    = 1433
 		err      error
 	)
@@ -43,8 +45,8 @@ func hp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := ""
-	err = conn.QueryRowContext(ctx, "SELECT @@version").Scan(&result)
-	// err = conn.QueryRowContext(ctx, "SELECT [email] FROM [auth].[dbo].[user] where first_name is null").Scan(&result)
+	// err = conn.QueryRowContext(ctx, "SELECT @@version").Scan(&result)
+	err = conn.QueryRowContext(ctx, "SELECT [company_name] FROM [exercise].[dbo].[company] where code = 'FirstTestCompanyCode'").Scan(&result)
 	if err != nil {
 		panic("Cannot select from database")
 	}

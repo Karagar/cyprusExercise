@@ -6,7 +6,6 @@ do
         echo "migration.sql completed"
         break
     else
-        echo "not ready yet..."
         sleep 1
     fi
 done
