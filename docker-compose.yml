@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: "cyprus_db"
+    platform: linux/x86_64
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    networks:
+      - default
+    restart: always
+    ports:
+      - "1433:1433"
+    environment:
+      MSSQL_SA_PASSWORD: "newer_use_it_in_prod"
+      ACCEPT_EULA: "Y"
+
+  # api:
+  #   container_name: "cyprus_api"
+  #   build:
+  #     context: .
+  #     dockerfile: ./api/Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - .:/app/
+
+networks:
+  default:
