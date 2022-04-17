@@ -1,12 +1,14 @@
 - Implement all CRUD operations
-- Implement limit and offset to reading operation
 - Implement filtering by every field for each operation
+- Implement limit and offset to reading operation
 - Add tests
-- Add auth service (use old template?)
+- Add readme
 - Add auth check for creation and deletion operations
 - Add IP check for Deletion operations
 - Add queue
 - Implement queue for creation, update and deletion operations
+-? Add auth service (use old template?)
+-? Use ORM instead of pure requests
 -? Separate Country to distinct table
 -? Validation of phones
 -? Make distinct service for working with DB
