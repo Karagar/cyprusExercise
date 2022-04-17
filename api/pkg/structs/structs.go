@@ -33,3 +33,8 @@ type Company struct {
 	DTUpdated   string
 	DTArchived  string
 }
+
+type CompanyResponse struct {
+	Data  []*Company `json:"data"`
+	Count int        `json:"count"`
+}

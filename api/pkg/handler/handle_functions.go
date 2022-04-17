@@ -22,6 +22,7 @@ func getHandlerFunc(funcName string) HandlerFunc {
 		"getCompanyHandler":    getCompanyHandler,
 		"postCompanyHandler":   postCompanyHandler,
 		"putCompanyHandler":    putCompanyHandler,
+		"patchCompanyHandler":  patchCompanyHandler,
 		"deleteCompanyHandler": deleteCompanyHandler,
 	}
 	return targetFunc[funcName]
@@ -32,7 +33,7 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	filterValues := getFilterList()
 	filterMap := getFilterMap()
 
-	company := []*structs.Company{}
+	response := structs.CompanyResponse{}
 	query := h.DB.WithContext(h.ctx).Table("company").Where("archive = ?", "False")
 
 	params := r.URL.Query()
@@ -64,16 +65,17 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 		query = query.Offset(offset)
 	}
 
-	query = query.Find(&company)
+	query = query.Find(&response.Data)
 	if query.Error != nil {
 		h.handleProblems(w, query.Error)
 		return
 	}
 
-	for _, v := range company {
+	for _, v := range response.Data {
 		v.Uuid = utils.HandleUuid(v.Id)
 	}
-	body, err := json.Marshal(company)
+	response.Count = int(query.RowsAffected)
+	body, err := json.Marshal(response)
 	if err != nil {
 		h.handleProblems(w, err)
 		return
@@ -84,6 +86,8 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
 
 func putCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
+
+func patchCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
 
 func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
 
