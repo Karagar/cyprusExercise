@@ -1,8 +1,6 @@
 - Implement all CRUD operations
 - Implement filtering by every field for each operation
-- Implement limit and offset to reading operation
 - Add tests
-- Add readme
 - Add auth check for creation and deletion operations
 - Add IP check for Deletion operations
 - Add queue

@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/Karagar/cyprusExercise/pkg/utils"
+	"github.com/Karagar/cyprusExercise/pkg/server"
 )
 
 func main() {
-	server := utils.ServerStruct{}
-	server.Declare()
+	server := server.New()
 	server.Serve()
 }

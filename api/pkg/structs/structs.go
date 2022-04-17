@@ -21,15 +21,15 @@ type Route struct {
 
 // Company - main object of this exercise
 type Company struct {
-	Uuid        []byte `json:"-"`
-	Guid        string `json:"Guid"`
-	CompanyName string `json:"CompanyName"`
-	Code        string `json:"Code"`
-	Country     string `json:"Country"`
-	Website     string `json:"Website"`
-	Phone       string `json:"Phone"`
-	Archive     bool   `json:"Archive"`
-	DTCreated   string `json:"DTCreated"`
-	DTUpdated   string `json:"DTUpdated"`
-	DTArchived  string `json:"DTArchived"`
+	Id          []byte `json:"-"`
+	Uuid        string
+	CompanyName string
+	Code        string
+	Country     string
+	Website     string
+	Phone       string
+	Archive     bool
+	DTCreated   string
+	DTUpdated   string
+	DTArchived  string
 }

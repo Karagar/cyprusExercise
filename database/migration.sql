@@ -8,7 +8,7 @@ USE exercise;
 Go
 
 Create table company (
-    uuid uniqueidentifier not null CONSTRAINT DF_company_uuid DEFAULT ((newid())),
+    id uniqueidentifier not null CONSTRAINT DF_company_id DEFAULT ((newid())),
     company_name nvarchar(255),
     code nvarchar(255),
     country nvarchar(128),
