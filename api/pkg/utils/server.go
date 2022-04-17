@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,16 +8,17 @@ import (
 	"strconv"
 
 	"github.com/Karagar/cyprusExercise/pkg/structs"
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"gorm.io/driver/sqlserver"
+	"gorm.io/gorm"
 )
 
 // serverStruct - structure for the core server entities
 type ServerStruct struct {
 	config       *structs.Config
 	logger       *zap.SugaredLogger
-	dbConnection *sql.DB
+	dbConnection *gorm.DB
 	address      string
 }
 
@@ -92,8 +92,8 @@ func (s *ServerStruct) getDBConnection() {
 		database = "exercise"
 	}
 
-	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s", server, user, password, port, database)
-	s.dbConnection, err = sql.Open("sqlserver", connString)
+	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s", user, password, server, port, database)
+	s.dbConnection, err = gorm.Open(sqlserver.Open(connString), &gorm.Config{})
 	panicOnErr(err)
 }
 
@@ -108,7 +108,9 @@ func (s *ServerStruct) getAddress() {
 
 // Serve - core handler
 func (s *ServerStruct) Serve() {
-	defer s.dbConnection.Close()
+	sqlDB, err := s.dbConnection.DB()
+	panicOnErr(err)
+	defer sqlDB.Close()
 	r := mux.NewRouter()
 
 	for _, route := range s.config.Routes {
