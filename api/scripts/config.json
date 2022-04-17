@@ -2,34 +2,38 @@
     "routes": [
         {
             "path":             {"url":"/api/company",  "method": "GET"},
-            "handler":          "GetCompanyHandler",
+            "handler":          "getCompanyHandler",
             "isNeedAuth":       false,
             "isCheckIP":        false,
             "isUseQueue":       false,
+            "isApi":            true,
             "timeoutSec":       5
         },
         {
             "path":             {"url":"/api/company",  "method": "POST"},
-            "handler":          "PostCompanyHandler",
+            "handler":          "postCompanyHandler",
             "isNeedAuth":       false,
             "isCheckIP":        false,
             "isUseQueue":       false,
+            "isApi":            true,
             "timeoutSec":       5
         },
         {
             "path":             {"url":"/api/company",  "method": "PUT"},
-            "handler":          "PutCompanyHandler",
+            "handler":          "putCompanyHandler",
             "isNeedAuth":       false,
             "isCheckIP":        false,
             "isUseQueue":       false,
+            "isApi":            true,
             "timeoutSec":       5
         },
         {
             "path":             {"url":"/api/company",  "method": "DELETE"},
-            "handler":          "DeleteCompanyHandler",
+            "handler":          "deleteCompanyHandler",
             "isNeedAuth":       false,
             "isCheckIP":        false,
             "isUseQueue":       false,
+            "isApi":            true,
             "timeoutSec":       5
         }
     ]

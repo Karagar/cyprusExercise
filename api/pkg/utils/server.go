@@ -33,7 +33,7 @@ func (s *ServerStruct) Declare() {
 func (s *ServerStruct) getConfig() {
 	configPath := os.Getenv("CONFIG_FILE")
 	if configPath == "" {
-		configPath = "./config.json"
+		configPath = "../scripts/config.json"
 	}
 
 	if s.config != nil {
@@ -67,7 +67,7 @@ func (s *ServerStruct) getLogger() {
 func (s *ServerStruct) getDBConnection() {
 	server := os.Getenv("DB_SERVER")
 	if server == "" {
-		server = "localhost"
+		server = "cyprus_db"
 	}
 
 	user := os.Getenv("DB_USER")
@@ -101,7 +101,7 @@ func (s *ServerStruct) getDBConnection() {
 func (s *ServerStruct) getAddress() {
 	address := os.Getenv("PORT")
 	if address == "" {
-		address = "127.0.0.1:8080"
+		address = ":8080"
 	}
 	s.address = address
 }

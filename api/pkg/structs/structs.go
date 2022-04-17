@@ -15,5 +15,6 @@ type Route struct {
 	IsNeedAuth bool   `json:"isNeedAuth"`
 	IsCheckIP  bool   `json:"isCheckIP"`
 	IsUseQueue bool   `json:"isUseQueue"`
+	IsApi      bool   `json:"isApi"`
 	TimeoutSec int    `json:"timeoutSec"`
 }

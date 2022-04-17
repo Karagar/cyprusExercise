@@ -9,6 +9,7 @@
 - Implement queue for creation, update and deletion operations
 -? Add auth service (use old template?)
 -? Use ORM instead of pure requests
+-? Use volume instead of migrations repeating
 -? Separate Country to distinct table
 -? Validation of phones
 -? Make distinct service for working with DB

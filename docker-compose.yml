@@ -10,7 +10,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      MSSQL_SA_PASSWORD: $MSSQL_SA_PASSWORD
+      DB_PASSWORD: Newer_use_it_in_prod111
+      DB_SERVER: cyprus_db
     depends_on:
       - db
 
@@ -21,7 +22,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "1433:1433"
+      - "1433"
     environment:
-      MSSQL_SA_PASSWORD: $MSSQL_SA_PASSWORD
+      MSSQL_SA_PASSWORD: Newer_use_it_in_prod111
       ACCEPT_EULA: "Y"
