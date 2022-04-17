@@ -57,6 +57,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handlerFunc := getHandlerFunc(h.Route.Handler)
+	h.Log.Info("Serve ", h.Route.Path.URL, " (", h.Route.Path.Method, ")")
 	handlerFunc(h, w, r)
 }
 

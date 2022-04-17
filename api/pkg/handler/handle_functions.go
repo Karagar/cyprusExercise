@@ -30,28 +30,8 @@ func getHandlerFunc(funcName string) HandlerFunc {
 }
 
 func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
-	h.Log.Info("Serve ", h.Route.Path.URL, " (", h.Route.Path.Method, ")")
-	filterValues := getFilterList()
-	filterMap := getFilterMap()
-
-	query := h.DB.WithContext(h.ctx).Table("company").Where("archive = ?", "False")
-
+	query := getRowsByParams(h, r)
 	params := r.URL.Query()
-	for k, _ := range params {
-		if slices.Contains(filterValues, k) {
-			query = query.Where(filterMap[k]+" = ?", params.Get(k))
-		}
-	}
-
-	identifier := params.Get("Uuid")
-	if identifier != "" {
-		_, err := uuid.Parse(identifier)
-		if err == nil {
-			query = query.Where(filterMap["Uuid"]+" = ?", identifier)
-		} else {
-			query = query.Where(filterMap["Uuid"]+" = ?", defaultIdentidier)
-		}
-	}
 
 	limitStr := params.Get("limit")
 	limit, err := strconv.Atoi(limitStr)
@@ -71,7 +51,6 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 }
 
 func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
-	h.Log.Info("Serve ", h.Route.Path.URL, " (", h.Route.Path.Method, ")")
 	company := &([]structs.Company{})
 	query := h.DB.WithContext(h.ctx).Table("company")
 
@@ -96,25 +75,59 @@ func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	sendData(h, w, r, query, response)
 }
 
-func putCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
+func putCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
+	query := getRowsByParams(h, r)
+	company := &(structs.Company{})
 
-func patchCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
-
-func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
-
-func getFilterMap() map[string]string {
-	return map[string]string{
-		"Uuid":    "id",
-		"Name":    "company_name",
-		"Code":    "code",
-		"Country": "country",
-		"Website": "website",
-		"Phone":   "phone",
+	err := utils.ReadJsonBody(r.Body, company)
+	if err != nil {
+		h.handleProblems(w, err)
+		return
 	}
+
+	fieldsMap := getFilterMap()
+	fields := make([]string, 0, len(fieldsMap))
+	for _, v := range fieldsMap {
+		fields = append(fields, v)
+	}
+
+	query.Select(fields).Updates(company)
+
+	response := structs.CompanyResponse{}
+	query = query.Find(&response.Data)
+	sendData(h, w, r, query, response)
 }
 
-func getFilterList() []string {
-	return []string{"Name", "Code", "Country", "Website", "Phone"}
+func patchCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
+	query := getRowsByParams(h, r)
+	company := &(structs.Company{})
+
+	err := utils.ReadJsonBody(r.Body, company)
+	if err != nil {
+		h.handleProblems(w, err)
+		return
+	}
+
+	query.Updates(company)
+
+	response := structs.CompanyResponse{}
+	query = query.Find(&response.Data)
+	sendData(h, w, r, query, response)
+}
+
+func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
+	query := getRowsByParams(h, r)
+	archive := true
+	dt_archive := time.Now().UTC().Format(time.RFC3339)
+	response := structs.CompanyResponse{}
+	query = query.Find(&response.Data)
+
+	query.Updates(&structs.Company{
+		Archive:    &archive,
+		DTArchived: &dt_archive,
+	})
+
+	sendData(h, w, r, query, response)
 }
 
 func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB, response structs.CompanyResponse) {
@@ -133,4 +146,44 @@ func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB
 		return
 	}
 	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
+}
+
+func getRowsByParams(h *Handler, r *http.Request) *gorm.DB {
+	filterValues := getFilterList()
+	filterMap := getFilterMap()
+
+	query := h.DB.WithContext(h.ctx).Table("company").Where("archive = ?", "False")
+
+	params := r.URL.Query()
+	for k, _ := range params {
+		if slices.Contains(filterValues, k) {
+			query = query.Where(filterMap[k]+" = ?", params.Get(k))
+		}
+	}
+
+	identifier := params.Get("Uuid")
+	if identifier != "" {
+		_, err := uuid.Parse(identifier)
+		if err == nil {
+			query = query.Where(filterMap["Uuid"]+" = ?", identifier)
+		} else {
+			query = query.Where(filterMap["Uuid"]+" = ?", defaultIdentidier)
+		}
+	}
+	return query
+}
+
+func getFilterMap() map[string]string {
+	return map[string]string{
+		"Uuid":    "id",
+		"Name":    "company_name",
+		"Code":    "code",
+		"Country": "country",
+		"Website": "website",
+		"Phone":   "phone",
+	}
+}
+
+func getFilterList() []string {
+	return []string{"Name", "Code", "Country", "Website", "Phone"}
 }

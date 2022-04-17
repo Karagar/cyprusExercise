@@ -11,6 +11,7 @@ Company is an entity defined by the following attributes:
 - Website - string
 - Phone - string
 
+
 The operations are defined by the query method as follows:
 - Create - (POST) /api/company.
     - In request body should be an objects with fields of company, we want to insert. Empty fields will be recorded as null.
@@ -21,9 +22,15 @@ The operations are defined by the query method as follows:
     - DB record:
         - [{"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}...]
     - Returned values:
-        - OK:     Status - 201; Body - inserted object; Example:
-            [{"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}]
-        - Error:  Status - according to error; Body - {"error": "Error description"}
+        - OK:
+            - Status - 201;
+            - Body - inserted object;
+            - Example:
+                - [{"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}]
+        - Error:
+            - Status - according to error;
+            - Body - {"error": "Error description"}
+
 
 - Read - (GET) /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter selected rows.
@@ -33,11 +40,17 @@ The operations are defined by the query method as follows:
     - Request body should be empty
     - DB record leaves unchanged
     - Returned values:
-        - OK:     Status - 200; Body - list of selected rows and their count; Example:
-            {"data": [{"Name": "AnyNewName",...},...], count: 3}
-        - Error:  Status - according to error; Body - {"error": "Error description"}
+        - OK:
+            - Status - 200;
+            - Body - list of selected rows and their count;
+            - Example:
+                - {"data": [{"Name": "AnyNewName",...},...], count: 3}
+        - Error:
+            - Status - according to error;
+            - Body - {"error": "Error description"}
 
-- Update(Merge) - PUT /api/company.
+
+- Update(Pure) - PUT /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter updated rows.
     - !Attention! if multiple rows match filters - all of then will be patched.
     - Example of path:
@@ -48,11 +61,17 @@ The operations are defined by the query method as follows:
     - DB record:
         - {"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}
     - Returned values:
-        - OK:     Status - 200; Body - list of updated rows and their count; Example:
-            {"data": [{"Name": "AnyNewName",...},...], count: 3}
-        - Error:  Status - according to error; Body - {"error": "Error description"}
+        - OK:
+            - Status - 200;
+            - Body - list of updated rows and their count;
+            - Example:
+                - {"data": [{"Name": "AnyNewName",...},...], count: 3}
+        - Error:
+            - Status - according to error;
+            - Body - {"error": "Error description"}
 
-- Update(Pure) - PATCH /api/company.
+
+- Update(Merge) - PATCH /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter updated rows.
     - !Attention! if multiple rows match filters - all of then will be updated.
     - Example of path:
@@ -63,11 +82,17 @@ The operations are defined by the query method as follows:
     - DB record:
         - {"Name": "AnyNewName", "Code": "OldCode", "Country": "AnyNewCountry", "Website": "OldWebsite", "Phone": "AnyNewPhone"}
     - Returned values:
-        - OK:     Status - 200; Body - list of updated rows and their count; Example:
-            {"data": [{"Name": "AnyNewName",...},...], count: 3}
-        - Error:  Status - according to error; Body - {"error": "Error description"}
+        - OK:
+            - Status - 200;
+            - Body - list of updated rows and their count;
+            - Example:
+                - {"data": [{"Name": "AnyNewName",...},...], count: 3}
+        - Error:
+            - Status - according to error;
+            - Body - {"error": "Error description"}
 
-- Update(Pure) - DELETE /api/company.
+
+- Delete - DELETE /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter deleted rows.
     - !Attention! if multiple rows match filters - all of then will be deleted.
     - Example of path:
@@ -77,6 +102,11 @@ The operations are defined by the query method as follows:
     - DB record:
         - {"Name": "AnyNewName", "Code": "OldCode", "Country": "AnyNewCountry", "Website": "OldWebsite", "Phone": "AnyNewPhone"}
     - Returned values:
-        - OK:     Status - 204; Body - list of updated rows and their count; Example:
-            {"data": [{"Name": "AnyNewName",...},...], count: 3}
-        - Error:  Status - according to error; Body - {"error": "Error description"}
+        - OK:
+            - Status - 200;
+            - Body - list of deleted rows and their count;
+            - Example:
+                - {"data": [{"Name": "AnyNewName",...},...], count: 3}
+        - Error:
+            - Status - according to error;
+            - Body - {"error": "Error description"}

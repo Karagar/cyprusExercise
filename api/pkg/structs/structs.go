@@ -31,7 +31,7 @@ type Company struct {
 	Archive     *bool   `gorm:"<-:update" json:"-"`
 	DTCreated   *string `gorm:"-" json:"-"`
 	DTUpdated   *string `gorm:"-" json:"-"`
-	DTArchived  *string `gorm:"-" json:"-"`
+	DTArchived  *string `gorm:"<-:update" json:"-"`
 }
 
 type CompanyResponse struct {
