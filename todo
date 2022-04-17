@@ -1,10 +1,8 @@
 - Implement all CRUD operations
-- Implement filtering by every field for each operation
 - Add tests
 - Add auth check for creation and deletion operations
 - Add IP check for Deletion operations
-- Add queue
-- Implement queue for creation, update and deletion operations
+- Add and implement queue for creation, update and deletion operations
 -? Add auth service (use old template?)
 -? Use volume instead of migrations repeating
 -? Separate Country to distinct table

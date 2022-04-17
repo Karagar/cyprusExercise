@@ -62,6 +62,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleProblems(w http.ResponseWriter, err error) {
 	h.Log.Error(err)
-	w.WriteHeader(http.StatusServiceUnavailable)
+	w.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprint(w, "{\"error\":", strconv.Quote(err.Error()), "}")
 }
