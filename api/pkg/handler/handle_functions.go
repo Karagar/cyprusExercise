@@ -11,6 +11,7 @@ import (
 	"github.com/Karagar/cyprusExercise/pkg/utils"
 	"github.com/google/uuid"
 	"golang.org/x/exp/slices"
+	"gorm.io/gorm"
 )
 
 type HandlerFunc func(h *Handler, w http.ResponseWriter, r *http.Request)
@@ -33,7 +34,6 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	filterValues := getFilterList()
 	filterMap := getFilterMap()
 
-	response := structs.CompanyResponse{}
 	query := h.DB.WithContext(h.ctx).Table("company").Where("archive = ?", "False")
 
 	params := r.URL.Query()
@@ -65,25 +65,36 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 		query = query.Offset(offset)
 	}
 
+	response := structs.CompanyResponse{}
 	query = query.Find(&response.Data)
-	if query.Error != nil {
-		h.handleProblems(w, query.Error)
-		return
-	}
+	sendData(h, w, r, query, response)
+}
 
-	for _, v := range response.Data {
-		v.Uuid = utils.HandleUuid(v.Id)
-	}
-	response.Count = int(query.RowsAffected)
-	body, err := json.Marshal(response)
+func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
+	h.Log.Info("Serve ", h.Route.Path.URL, " (", h.Route.Path.Method, ")")
+	company := &([]structs.Company{})
+	query := h.DB.WithContext(h.ctx).Table("company")
+
+	err := utils.ReadJsonBody(r.Body, company)
 	if err != nil {
 		h.handleProblems(w, err)
 		return
 	}
-	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
-}
 
-func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
+	result := query.Create(&company)
+	if err != nil {
+		h.handleProblems(w, result.Error)
+		return
+	}
+
+	UUIDs := [][]byte{}
+	for _, v := range *company {
+		UUIDs = append(UUIDs, v.ID)
+	}
+	response := structs.CompanyResponse{}
+	query = query.Find(&response.Data, UUIDs)
+	sendData(h, w, r, query, response)
+}
 
 func putCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {}
 
@@ -104,4 +115,22 @@ func getFilterMap() map[string]string {
 
 func getFilterList() []string {
 	return []string{"Name", "Code", "Country", "Website", "Phone"}
+}
+
+func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB, response structs.CompanyResponse) {
+	if query.Error != nil {
+		h.handleProblems(w, query.Error)
+		return
+	}
+
+	for _, v := range response.Data {
+		v.Uuid = utils.HandleUuid(v.ID)
+	}
+	response.Count = int(query.RowsAffected)
+	body, err := json.Marshal(response)
+	if err != nil {
+		h.handleProblems(w, err)
+		return
+	}
+	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
 }

@@ -21,17 +21,17 @@ type Route struct {
 
 // Company - main object of this exercise
 type Company struct {
-	Id          []byte `json:"-"`
-	Uuid        string
-	CompanyName string
-	Code        string
-	Country     string
-	Website     string
-	Phone       string
-	Archive     bool
-	DTCreated   string
-	DTUpdated   string
-	DTArchived  string
+	ID          []byte  `gorm:"default:newid()" json:"-"`
+	Uuid        string  `gorm:"-"`
+	CompanyName *string `json:"Name"`
+	Code        *string
+	Country     *string
+	Website     *string
+	Phone       *string
+	Archive     *bool   `gorm:"<-:update" json:"-"`
+	DTCreated   *string `gorm:"-" json:"-"`
+	DTUpdated   *string `gorm:"-" json:"-"`
+	DTArchived  *string `gorm:"-" json:"-"`
 }
 
 type CompanyResponse struct {
