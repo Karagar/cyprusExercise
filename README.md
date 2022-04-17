@@ -13,16 +13,16 @@ Company is an entity defined by the following attributes:
 
 The operations are defined by the query method as follows:
 - Create - (POST) /api/company.
-    - In request body should be an object with fields of company, we want to insert. Empty fields will be recorded as null.
+    - In request body should be an objects with fields of company, we want to insert. Empty fields will be recorded as null.
     - Example of path:
         - POST /api/company
     - Example of body:
         - [{"Name": "AnyNewName", "Country": "AnyNewCountry", "Phone": "AnyNewPhone"}...]
     - DB record:
-        - {"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}
+        - [{"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}...]
     - Returned values:
         - OK:     Status - 201; Body - inserted object; Example:
-            {"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}
+            [{"Name": "AnyNewName", "Code": null, "Country": "AnyNewCountry", "Website": null, "Phone": "AnyNewPhone"}]
         - Error:  Status - according to error; Body - {"error": "Error description"}
 
 - Read - (GET) /api/company.
@@ -40,7 +40,6 @@ The operations are defined by the query method as follows:
 - Update(Merge) - PUT /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter updated rows.
     - !Attention! if multiple rows match filters - all of then will be patched.
-    - !Attention! if there will be an error on any of rows - no one of them will be updated.
     - Example of path:
         - PUT /api/company?Uuid=00000000-0000-0000-0000-000000000000&Name=OldName&Code=OldCode
     - In request body should be an object with new values for fields, we want to update. Missing fields will be recorded as null.
@@ -56,7 +55,6 @@ The operations are defined by the query method as follows:
 - Update(Pure) - PATCH /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter updated rows.
     - !Attention! if multiple rows match filters - all of then will be updated.
-    - !Attention! if there will be an error on any of rows - no one of them will be updated.
     - Example of path:
         - PATCH /api/company?Uuid=00000000-0000-0000-0000-000000000000&Name=OldName&Code=OldCode
     - In request body should be an object with new values for fields, we want to update. Missing fields will be unchanged.
@@ -72,7 +70,6 @@ The operations are defined by the query method as follows:
 - Update(Pure) - DELETE /api/company.
     - In accordance with the exercise in query parameters should be a fields to filter deleted rows.
     - !Attention! if multiple rows match filters - all of then will be deleted.
-    - !Attention! if there will be an error on any of rows - no one of them will be deleted.
     - Example of path:
         - DELETE /api/company?Uuid=00000000-0000-0000-0000-000000000000&Name=OldName&Code=OldCode
     - Request body should be empty
