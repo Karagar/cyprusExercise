@@ -1,7 +1,5 @@
-- Implement all CRUD operations
 - Add tests
 - Add auth check for creation and deletion operations
-- Add IP check for Deletion operations
 - Add and implement queue for creation, update and deletion operations
 -? Add auth service (use old template?)
 -? Use volume instead of migrations repeating

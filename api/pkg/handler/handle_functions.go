@@ -130,24 +130,6 @@ func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	sendData(h, w, r, query, response)
 }
 
-func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB, response structs.CompanyResponse) {
-	if query.Error != nil {
-		h.handleProblems(w, query.Error)
-		return
-	}
-
-	for _, v := range response.Data {
-		v.Uuid = utils.HandleUuid(v.ID)
-	}
-	response.Count = int(query.RowsAffected)
-	body, err := json.Marshal(response)
-	if err != nil {
-		h.handleProblems(w, err)
-		return
-	}
-	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
-}
-
 func getRowsByParams(h *Handler, r *http.Request) *gorm.DB {
 	filterValues := getFilterList()
 	filterMap := getFilterMap()
@@ -171,6 +153,24 @@ func getRowsByParams(h *Handler, r *http.Request) *gorm.DB {
 		}
 	}
 	return query
+}
+
+func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB, response structs.CompanyResponse) {
+	if query.Error != nil {
+		h.handleProblems(w, query.Error)
+		return
+	}
+
+	for _, v := range response.Data {
+		v.Uuid = utils.HandleUuid(v.ID)
+	}
+	response.Count = int(query.RowsAffected)
+	body, err := json.Marshal(response)
+	if err != nil {
+		h.handleProblems(w, err)
+		return
+	}
+	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
 }
 
 func getFilterMap() map[string]string {

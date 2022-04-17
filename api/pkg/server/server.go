@@ -25,6 +25,7 @@ type ServerStruct struct {
 
 var server *ServerStruct
 
+// New is for server structure initialization
 func New() *ServerStruct {
 	if server != nil {
 		return server

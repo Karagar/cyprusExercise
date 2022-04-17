@@ -34,6 +34,7 @@ type Company struct {
 	DTArchived  *string `gorm:"<-:update" json:"-"`
 }
 
+// CompanyResponse - structure that server send to client on request
 type CompanyResponse struct {
 	Data  []*Company `json:"data"`
 	Count int        `json:"count"`

@@ -2,12 +2,15 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/Karagar/cyprusExercise/pkg/structs"
+	"github.com/Karagar/cyprusExercise/pkg/utils"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -45,7 +48,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.Route.IsCheckIP {
-		h.Log.Info("Stub for ip checking")
+		ipapiClient := http.Client{}
+		clientIP := utils.ReadUserIP(r, false)
+		checkUrl := fmt.Sprintf("https://ipapi.co/%s/country/", clientIP)
+		req, err := http.NewRequest("GET", checkUrl, nil)
+		req.Header.Set("User-Agent", "ipapi.co/#go-v1.5")
+		resp, err := ipapiClient.Do(req)
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			h.handleProblems(w, err)
+		}
+		if string(body) != "CY" {
+			h.handleProblems(w, errors.New("Sorry, You've got wrong placement"))
+		}
 	}
 
 	if h.Route.IsUseQueue {
