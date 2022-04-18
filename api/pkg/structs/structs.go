@@ -30,7 +30,7 @@ type Company struct {
 	Phone       *string
 	Archive     *bool   `gorm:"<-:update" json:"-"`
 	DTCreated   *string `gorm:"-" json:"-"`
-	DTUpdated   *string `gorm:"-" json:"-"`
+	DTUpdated   *string `gorm:"<-:update" json:"-"`
 	DTArchived  *string `gorm:"<-:update" json:"-"`
 }
 

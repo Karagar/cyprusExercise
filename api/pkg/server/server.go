@@ -39,7 +39,7 @@ func New() *ServerStruct {
 	return server
 }
 
-// getAddress - func to get listening address
+// getAddress - func to get server listening address
 func (s *ServerStruct) getAddress() {
 	address := os.Getenv("PORT")
 	if address == "" {

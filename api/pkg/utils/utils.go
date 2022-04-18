@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 //MustReadFile panic if can not read file by fileName
@@ -33,6 +35,7 @@ func PanicOnErr(err error) {
 }
 
 // HandleUuid used to enable people to work with mssql GUID, not just machines
+// will retrieve a byte representation and return the string
 func HandleUuid(id []byte) string {
 	return fmt.Sprintf("%X-%X-%X-%X-%X", id[0:4], id[4:6], id[6:8], id[8:10], id[10:])
 }
@@ -48,7 +51,9 @@ func ReadJsonBody(rawBody io.ReadCloser, s interface{}) error {
 	return err
 }
 
-// ReadUserIP used to check user IP address. If we dont care that user can spoof it - set it to True
+// ReadUserIP used to check user IP address
+// will retrieve a request and return the IP string
+// If we dont care that user can spoof it - set second param to True
 func ReadUserIP(r *http.Request, isCheckHeader bool) string {
 	IPAddress := r.RemoteAddr
 	if IPAddress != "" {
@@ -66,4 +71,28 @@ func ReadUserIP(r *http.Request, isCheckHeader bool) string {
 	}
 
 	return IPAddress
+}
+
+// ReadCookie to get user cookie from request by name
+func ReadCookie(name string, r *http.Request) string {
+	token, err := r.Cookie(name)
+	if err != nil {
+		return ""
+	}
+
+	return token.Value
+}
+
+// ReadJwt received JWT token and gave its claims
+func ReadJwt(tokenString string) (jwt.MapClaims, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims, nil
+	} else {
+		return nil, err
+	}
 }

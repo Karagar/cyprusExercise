@@ -4,13 +4,15 @@ Golang REST API microservice to handle Companies
 Everything that I wanted to do but did not have time can be viewed in the `todo` file
 
 Company is an entity defined by the following attributes:
-- Uuid - uniqueidenfier
+- Uuid - uniqueidenfier, generated automatically on creation of object
 - Name - string
 - Code - string
 - Country - string
 - Website - string
 - Phone - string
 
+!Stub JWT token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"!
+Accordance with the exercise to make some requests you should have it in your cookies with name 'token'
 
 The operations are defined by the query method as follows:
 - Create - (POST) /api/company.

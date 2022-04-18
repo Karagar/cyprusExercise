@@ -18,6 +18,7 @@ type HandlerFunc func(h *Handler, w http.ResponseWriter, r *http.Request)
 
 const defaultIdentidier = "00000000-0000-0000-0000-000000000000"
 
+// getHandlerFunc is for selection the appropriate handler according to the config
 func getHandlerFunc(funcName string) HandlerFunc {
 	targetFunc := map[string]HandlerFunc{
 		"getCompanyHandler":    getCompanyHandler,
@@ -29,6 +30,7 @@ func getHandlerFunc(funcName string) HandlerFunc {
 	return targetFunc[funcName]
 }
 
+// getCompanyHandler is for reading company rows
 func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	query := getRowsByParams(h, r)
 	params := r.URL.Query()
@@ -50,19 +52,20 @@ func getCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	sendData(h, w, r, query, response)
 }
 
+// postCompanyHandler is for creating new company rows with client object
 func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	company := &([]structs.Company{})
 	query := h.DB.WithContext(h.ctx).Table("company")
 
 	err := utils.ReadJsonBody(r.Body, company)
 	if err != nil {
-		h.handleProblems(w, err)
+		h.handleProblems(w, http.StatusBadRequest, err)
 		return
 	}
 
 	result := query.Create(&company)
 	if err != nil {
-		h.handleProblems(w, result.Error)
+		h.handleProblems(w, http.StatusBadGateway, result.Error)
 		return
 	}
 
@@ -75,46 +78,86 @@ func postCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	sendData(h, w, r, query, response)
 }
 
+// putCompanyHandler is for updating company rows with client object
 func putCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	query := getRowsByParams(h, r)
 	company := &(structs.Company{})
+	response := structs.CompanyResponse{}
 
-	err := utils.ReadJsonBody(r.Body, company)
-	if err != nil {
-		h.handleProblems(w, err)
+	// select companies
+	query = query.Find(&response.Data)
+	if query.Error != nil {
+		h.handleProblems(w, http.StatusInternalServerError, query.Error)
 		return
 	}
 
-	fieldsMap := getFilterMap()
-	fields := make([]string, 0, len(fieldsMap))
-	for _, v := range fieldsMap {
-		fields = append(fields, v)
+	// get selected companies uuids
+	uuidList := [][]byte{}
+	for _, v := range response.Data {
+		uuidList = append(uuidList, v.ID)
 	}
 
+	// get client's put object
+	err := utils.ReadJsonBody(r.Body, company)
+	if err != nil {
+		h.handleProblems(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// make update on all fields
+	filterValues := getFilterList()
+	fieldColumnMap := getFieldColumnMap()
+	fields := make([]string, 0, len(filterValues))
+	for _, v := range filterValues {
+		fields = append(fields, fieldColumnMap[v])
+	}
+	fields = append(fields, fieldColumnMap["DTUpdated"])
+	dt_updated := time.Now().UTC().Format(time.RFC3339)
+	company.DTUpdated = &dt_updated
 	query.Select(fields).Updates(company)
 
-	response := structs.CompanyResponse{}
-	query = query.Find(&response.Data)
+	// get updated companies by uuids
+	query = h.DB.WithContext(h.ctx).Table("company")
+	query = query.Where(uuidList).Find(&response.Data)
 	sendData(h, w, r, query, response)
 }
 
+// patchCompanyHandler is for merge company rows with client object
 func patchCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	query := getRowsByParams(h, r)
 	company := &(structs.Company{})
+	response := structs.CompanyResponse{}
 
-	err := utils.ReadJsonBody(r.Body, company)
-	if err != nil {
-		h.handleProblems(w, err)
+	// select companies
+	query = query.Find(&response.Data)
+	if query.Error != nil {
+		h.handleProblems(w, http.StatusInternalServerError, query.Error)
 		return
 	}
 
+	// get selected companies uuids
+	uuidList := [][]byte{}
+	for _, v := range response.Data {
+		uuidList = append(uuidList, v.ID)
+	}
+
+	// make patch
+	err := utils.ReadJsonBody(r.Body, company)
+	if err != nil {
+		h.handleProblems(w, http.StatusBadRequest, err)
+		return
+	}
+	dt_updated := time.Now().UTC().Format(time.RFC3339)
+	company.DTUpdated = &dt_updated
 	query.Updates(company)
 
-	response := structs.CompanyResponse{}
-	query = query.Find(&response.Data)
+	// get updated companies by uuids
+	query = h.DB.WithContext(h.ctx).Table("company")
+	query = query.Where(uuidList).Find(&response.Data, uuidList)
 	sendData(h, w, r, query, response)
 }
 
+// deleteCompanyHandler is for archivating company rows in DB
 func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	query := getRowsByParams(h, r)
 	archive := true
@@ -125,21 +168,26 @@ func deleteCompanyHandler(h *Handler, w http.ResponseWriter, r *http.Request) {
 	query.Updates(&structs.Company{
 		Archive:    &archive,
 		DTArchived: &dt_archive,
+		DTUpdated:  &dt_archive,
 	})
 
 	sendData(h, w, r, query, response)
 }
 
+// getRowsByParams filtered query in accordance with client request
 func getRowsByParams(h *Handler, r *http.Request) *gorm.DB {
 	filterValues := getFilterList()
-	filterMap := getFilterMap()
+	fieldColumnMap := getFieldColumnMap()
+	company := map[string]interface{}{
+		fieldColumnMap["Archive"]: false,
+	}
 
-	query := h.DB.WithContext(h.ctx).Table("company").Where("archive = ?", "False")
+	query := h.DB.WithContext(h.ctx).Table("company")
 
 	params := r.URL.Query()
 	for k, _ := range params {
 		if slices.Contains(filterValues, k) {
-			query = query.Where(filterMap[k]+" = ?", params.Get(k))
+			company[fieldColumnMap[k]] = params.Get(k)
 		}
 	}
 
@@ -147,17 +195,18 @@ func getRowsByParams(h *Handler, r *http.Request) *gorm.DB {
 	if identifier != "" {
 		_, err := uuid.Parse(identifier)
 		if err == nil {
-			query = query.Where(filterMap["Uuid"]+" = ?", identifier)
+			company[fieldColumnMap["Uuid"]] = identifier
 		} else {
-			query = query.Where(filterMap["Uuid"]+" = ?", defaultIdentidier)
+			company[fieldColumnMap["Uuid"]] = defaultIdentidier
 		}
 	}
-	return query
+	return query.Where(company)
 }
 
+// sendData returns the result to the client
 func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB, response structs.CompanyResponse) {
 	if query.Error != nil {
-		h.handleProblems(w, query.Error)
+		h.handleProblems(w, http.StatusInternalServerError, query.Error)
 		return
 	}
 
@@ -167,23 +216,27 @@ func sendData(h *Handler, w http.ResponseWriter, r *http.Request, query *gorm.DB
 	response.Count = int(query.RowsAffected)
 	body, err := json.Marshal(response)
 	if err != nil {
-		h.handleProblems(w, err)
+		h.handleProblems(w, http.StatusInternalServerError, err)
 		return
 	}
 	http.ServeContent(w, r, "index.json", time.Time{}, bytes.NewReader(body))
 }
 
-func getFilterMap() map[string]string {
+// getFieldColumnMap return map of Company fields - DB columns
+func getFieldColumnMap() map[string]string {
 	return map[string]string{
-		"Uuid":    "id",
-		"Name":    "company_name",
-		"Code":    "code",
-		"Country": "country",
-		"Website": "website",
-		"Phone":   "phone",
+		"Uuid":      "id",
+		"Name":      "company_name",
+		"Code":      "code",
+		"Country":   "country",
+		"Website":   "website",
+		"Phone":     "phone",
+		"Archive":   "archive",
+		"DTUpdated": "dt_updated",
 	}
 }
 
+// getFilterList return list of possible client filters
 func getFilterList() []string {
 	return []string{"Name", "Code", "Country", "Website", "Phone"}
 }
